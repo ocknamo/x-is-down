@@ -5,7 +5,7 @@ import {
   getPublicKey,
   nip19,
 } from 'nostr-tools'
-import type { Event } from 'nostr-tools'
+import type { Event, Filter } from 'nostr-tools'
 
 export const RELAYS = [
   'wss://relay.damus.io',
@@ -79,13 +79,11 @@ export function subscribeToTag(
 
   const sub = pool.subscribeMany(
     RELAYS,
-    [
-      {
-        kinds: [1],
-        '#t': [HASHTAG],
-        limit: 50,
-      },
-    ],
+    {
+      kinds: [1],
+      '#t': [HASHTAG],
+      limit: 50,
+    } satisfies Filter,
     {
       onevent: onEvent,
       oneose: onEose,
