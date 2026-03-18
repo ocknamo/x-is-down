@@ -49,6 +49,7 @@ export async function publishPost(content: string): Promise<Event> {
 
   const pool = new SimplePool()
   await Promise.any(pool.publish(RELAYS, event))
+  await new Promise((resolve) => setTimeout(resolve, 5000))
   pool.close(RELAYS)
 
   return event
