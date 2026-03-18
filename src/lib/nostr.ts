@@ -49,8 +49,22 @@ export async function publishPost(content: string): Promise<Event> {
     secretKey,
   )
 
+  console.log('[publishPost] event:', event)
+  console.log('[publishPost] relays:', RELAYS)
+
   const pool = new SimplePool()
-  await Promise.any(pool.publish(RELAYS, event))
+  const results = pool.publish(RELAYS, event)
+
+  const promises = results.map((p, i) =>
+    p
+      .then(() => console.log(`[publishPost] success: ${RELAYS[i]}`))
+      .catch((e: unknown) => console.error(`[publishPost] failed: ${RELAYS[i]}`, e)),
+  )
+
+  await Promise.any(results)
+  console.log('[publishPost] at least one relay accepted the event')
+
+  await Promise.allSettled(promises)
   await new Promise((resolve) => setTimeout(resolve, 5000))
   pool.close(RELAYS)
 
