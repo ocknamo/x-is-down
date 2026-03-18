@@ -11,6 +11,8 @@ export const RELAYS = [
   'wss://relay.damus.io',
   'wss://nos.lol',
   'wss://relay.nostr.band',
+  'wss://yabu.me',
+  'wss://r.kojira.io',
 ]
 
 export const HASHTAG = 'xisdown'
