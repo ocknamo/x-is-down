@@ -3,7 +3,9 @@ import App from './App.svelte'
 import { mount } from 'svelte'
 import { createConsoleViewer } from 'console-daijin'
 
-createConsoleViewer()
+if (window.self !== window.top) {
+  createConsoleViewer()
+}
 
 const app = mount(App, {
   target: document.getElementById('app')!,
