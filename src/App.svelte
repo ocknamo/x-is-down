@@ -1,30 +1,53 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
   import type { Event } from 'nostr-tools'
-  import { subscribeToTag } from './lib/nostr'
+  import { subscribeToTag, fetchRecentPosts } from './lib/nostr'
   import PostForm from './lib/PostForm.svelte'
   import Timeline from './lib/Timeline.svelte'
 
   let posts = $state<Event[]>([])
   let loading = $state(true)
 
+  function sortedByTime(events: Event[]): Event[] {
+    return [...events].sort((a, b) => b.created_at - a.created_at)
+  }
+
   function handlePosted(event: Event) {
     if (!posts.find(p => p.id === event.id)) {
-      posts = [event, ...posts]
+      posts = sortedByTime([event, ...posts])
     }
   }
 
   function handleEvent(event: Event) {
     if (!posts.find(p => p.id === event.id)) {
-      posts = [...posts, event]
+      posts = sortedByTime([...posts, event])
     }
   }
 
-  const unsubscribe = subscribeToTag(handleEvent, () => {
+  let refreshInterval: ReturnType<typeof setInterval> | undefined
+
+  const { unsubscribe, isConnected } = subscribeToTag(handleEvent, () => {
     loading = false
+    refreshInterval = setInterval(() => {
+      if (isConnected()) {
+        console.log('[refresh] connection alive, skipping fetch')
+        return
+      }
+      console.log('[refresh] connection lost, fetching recent posts')
+      const since = posts.length > 0
+        ? Math.max(...posts.map(p => p.created_at))
+        : Math.floor(Date.now() / 1000) - 60
+      fetchRecentPosts(since, handleEvent)
+        .catch((e: unknown) =>
+          console.error('[refresh] fetchRecentPosts failed:', e)
+        )
+    }, 60_000)
   })
 
-  onDestroy(unsubscribe)
+  onDestroy(() => {
+    unsubscribe()
+    clearInterval(refreshInterval)
+  })
 </script>
 
 <div class="min-h-screen bg-black text-white">
