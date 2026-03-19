@@ -16,7 +16,7 @@
       },
       "style": {
         "useConst": "off",
-        "useImportExtensions": "off"
+        "noNonNullAssertion": "off"
       }
     }
   },

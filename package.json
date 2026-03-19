@@ -11,18 +11,23 @@
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "format": "biome format --write .",
-    "generate-ogp": "node scripts/generate-ogp.js"
+    "generate-ogp": "node scripts/generate-ogp.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "sharp": "^0.33.5",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@tailwindcss/vite": "^4.0.0",
+    "@vitest/coverage-v8": "^4.1.0",
+    "sharp": "^0.33.5",
     "svelte": "^5.0.0",
     "svelte-check": "^4.1.4",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "vite": "^6.0.5",
+    "vitest": "^4.1.0"
   },
   "dependencies": {
     "console-daijin": "^0.1.5",

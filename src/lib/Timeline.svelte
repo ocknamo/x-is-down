@@ -8,10 +8,6 @@
   }
 
   const { posts, loading }: Props = $props()
-
-  const sorted = $derived(
-    [...posts].sort((a, b) => b.created_at - a.created_at)
-  )
 </script>
 
 <section>
@@ -24,13 +20,13 @@
     <div class="flex justify-center py-8">
       <div class="w-6 h-6 border-2 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
     </div>
-  {:else if sorted.length === 0}
+  {:else if posts.length === 0}
     <div class="px-4 py-8 text-center text-zinc-500">
       <p>まだ投稿がありません</p>
       <p class="text-sm mt-1">最初に「X落ちてる」と投稿しよう！</p>
     </div>
   {:else}
-    {#each sorted as event (event.id)}
+    {#each posts as event (event.id)}
       <Post {event} />
     {/each}
   {/if}
