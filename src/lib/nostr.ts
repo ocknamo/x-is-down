@@ -34,6 +34,9 @@ export const secretKey = loadOrCreateSecretKey()
 export const publicKey = getPublicKey(secretKey)
 export const npub = nip19.npubEncode(publicKey)
 
+console.log('[nostr] pubkey:', publicKey)
+console.log('[nostr] npub:', npub)
+
 export function shortNpub(npubStr: string): string {
   return `${npubStr.slice(0, 8)}...${npubStr.slice(-4)}`
 }
@@ -49,24 +52,30 @@ export async function publishPost(content: string): Promise<Event> {
     secretKey,
   )
 
-  console.log('[publishPost] event:', event)
-  console.log('[publishPost] relays:', RELAYS)
+  console.log('[publishPost] finalized event:', JSON.stringify(event, null, 2))
 
   const pool = new SimplePool()
   const results = pool.publish(RELAYS, event)
 
   const promises = results.map((p, i) =>
     p
-      .then(() => console.log(`[publishPost] success: ${RELAYS[i]}`))
-      .catch((e: unknown) => console.error(`[publishPost] failed: ${RELAYS[i]}`, e)),
+      .then((msg) => console.log(`[publishPost] relay ok: ${RELAYS[i]}`, msg))
+      .catch((e: unknown) => console.error(`[publishPost] relay failed: ${RELAYS[i]}`, e)),
   )
 
-  await Promise.any(results)
-  console.log('[publishPost] at least one relay accepted the event')
+  try {
+    await Promise.any(results)
+    console.log('[publishPost] at least one relay accepted the event')
+  } catch (e) {
+    console.error('[publishPost] ALL relays failed!', e)
+    throw e
+  }
 
   await Promise.allSettled(promises)
+  console.log('[publishPost] all relay responses settled, closing pool in 5s...')
   await new Promise((resolve) => setTimeout(resolve, 5000))
   pool.close(RELAYS)
+  console.log('[publishPost] pool closed')
 
   return event
 }
@@ -75,6 +84,7 @@ export function subscribeToTag(
   onEvent: (event: Event) => void,
   onEose?: () => void,
 ): () => void {
+  console.log('[subscribeToTag] starting subscription, relays:', RELAYS)
   const pool = new SimplePool()
 
   const sub = pool.subscribeMany(
@@ -85,8 +95,14 @@ export function subscribeToTag(
       limit: 50,
     } satisfies Filter,
     {
-      onevent: onEvent,
-      oneose: onEose,
+      onevent: (event) => {
+        console.log('[subscribeToTag] received event id:', event.id, 'pubkey:', event.pubkey)
+        onEvent(event)
+      },
+      oneose: () => {
+        console.log('[subscribeToTag] EOSE received')
+        onEose?.()
+      },
     },
   )
 
