@@ -73,7 +73,7 @@ export async function publishPost(content: string): Promise<Event> {
 
   await Promise.allSettled(promises)
   console.log('[publishPost] all relay responses settled, closing pool in 5s...')
-  await new Promise((resolve) => setTimeout(resolve, 5000))
+  await new Promise((resolve) => setTimeout(resolve, 2000))
   pool.close(RELAYS)
   console.log('[publishPost] pool closed')
 
