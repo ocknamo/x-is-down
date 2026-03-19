@@ -2,38 +2,23 @@
   import { onDestroy } from 'svelte'
   import type { Event } from 'nostr-tools'
   import { subscribeToTag, fetchRecentPosts } from './lib/nostr'
+  import { addUniqueEvent } from './lib/utils'
   import PostForm from './lib/PostForm.svelte'
   import Timeline from './lib/Timeline.svelte'
 
   let posts = $state<Event[]>([])
   let loading = $state(true)
 
-  function sortedByTime(events: Event[]): Event[] {
-    return [...events].sort((a, b) => b.created_at - a.created_at)
-  }
-
-  function handlePosted(event: Event) {
-    if (!posts.find(p => p.id === event.id)) {
-      posts = sortedByTime([event, ...posts])
-    }
-  }
-
   function handleEvent(event: Event) {
-    if (!posts.find(p => p.id === event.id)) {
-      posts = sortedByTime([...posts, event])
-    }
+    posts = addUniqueEvent(posts, event)
   }
 
   let refreshInterval: ReturnType<typeof setInterval> | undefined
 
-  const { unsubscribe, isConnected } = subscribeToTag(handleEvent, () => {
+  const { unsubscribe } = subscribeToTag(handleEvent, () => {
     loading = false
     refreshInterval = setInterval(() => {
-      if (isConnected()) {
-        console.log('[refresh] connection alive, skipping fetch')
-        return
-      }
-      console.log('[refresh] connection lost, fetching recent posts')
+      console.log('[refresh] fetching recent posts')
       const since = posts.length > 0
         ? Math.max(...posts.map(p => p.created_at))
         : Math.floor(Date.now() / 1000) - 60
@@ -69,7 +54,7 @@
   <!-- Main -->
   <main class="max-w-xl mx-auto">
     <!-- Post Form -->
-    <PostForm onPosted={handlePosted} />
+    <PostForm onPosted={handleEvent} />
 
     <!-- Timeline -->
     <Timeline {posts} {loading} />

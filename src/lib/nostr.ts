@@ -83,7 +83,7 @@ export async function publishPost(content: string): Promise<Event> {
 export function subscribeToTag(
   onEvent: (event: Event) => void,
   onEose?: () => void,
-): { unsubscribe: () => void; isConnected: () => boolean } {
+): { unsubscribe: () => void } {
   console.log('[subscribeToTag] starting subscription, relays:', RELAYS)
   const pool = new SimplePool()
 
@@ -111,8 +111,6 @@ export function subscribeToTag(
       sub.close()
       pool.close(RELAYS)
     },
-    // pool.relays は protected だが型チェック用にキャスト
-    isConnected: () => RELAYS.some(url => (pool as unknown as { relays: Map<string, { connected: boolean }> }).relays.get(url)?.connected ?? false),
   }
 }
 
