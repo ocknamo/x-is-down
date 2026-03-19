@@ -23,6 +23,7 @@
     "vite": "^6.0.5"
   },
   "dependencies": {
+    "console-daijin": "^0.1.5",
     "nostr-tools": "^2.10.4"
   }
 }

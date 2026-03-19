@@ -5,12 +5,14 @@ import {
   getPublicKey,
   nip19,
 } from 'nostr-tools'
-import type { Event } from 'nostr-tools'
+import type { Event, Filter } from 'nostr-tools'
 
 export const RELAYS = [
   'wss://relay.damus.io',
   'wss://nos.lol',
   'wss://relay.nostr.band',
+  'wss://yabu.me',
+  'wss://r.kojira.io',
 ]
 
 export const HASHTAG = 'xisdown'
@@ -32,6 +34,9 @@ export const secretKey = loadOrCreateSecretKey()
 export const publicKey = getPublicKey(secretKey)
 export const npub = nip19.npubEncode(publicKey)
 
+console.log('[nostr] pubkey:', publicKey)
+console.log('[nostr] npub:', npub)
+
 export function shortNpub(npubStr: string): string {
   return `${npubStr.slice(0, 8)}...${npubStr.slice(-4)}`
 }
@@ -47,9 +52,30 @@ export async function publishPost(content: string): Promise<Event> {
     secretKey,
   )
 
+  console.log('[publishPost] finalized event:', JSON.stringify(event, null, 2))
+
   const pool = new SimplePool()
-  await Promise.any(pool.publish(RELAYS, event))
+  const results = pool.publish(RELAYS, event)
+
+  const promises = results.map((p, i) =>
+    p
+      .then((msg) => console.log(`[publishPost] relay ok: ${RELAYS[i]}`, msg))
+      .catch((e: unknown) => console.error(`[publishPost] relay failed: ${RELAYS[i]}`, e)),
+  )
+
+  try {
+    await Promise.any(results)
+    console.log('[publishPost] at least one relay accepted the event')
+  } catch (e) {
+    console.error('[publishPost] ALL relays failed!', e)
+    throw e
+  }
+
+  await Promise.allSettled(promises)
+  console.log('[publishPost] all relay responses settled, closing pool in 5s...')
+  await new Promise((resolve) => setTimeout(resolve, 1000))
   pool.close(RELAYS)
+  console.log('[publishPost] pool closed')
 
   return event
 }
@@ -58,20 +84,25 @@ export function subscribeToTag(
   onEvent: (event: Event) => void,
   onEose?: () => void,
 ): () => void {
+  console.log('[subscribeToTag] starting subscription, relays:', RELAYS)
   const pool = new SimplePool()
 
   const sub = pool.subscribeMany(
     RELAYS,
-    [
-      {
-        kinds: [1],
-        '#t': [HASHTAG],
-        limit: 50,
-      },
-    ],
     {
-      onevent: onEvent,
-      oneose: onEose,
+      kinds: [1],
+      '#t': [HASHTAG],
+      limit: 50,
+    } satisfies Filter,
+    {
+      onevent: (event) => {
+        console.log('[subscribeToTag] received event id:', event.id, 'pubkey:', event.pubkey)
+        onEvent(event)
+      },
+      oneose: () => {
+        console.log('[subscribeToTag] EOSE received')
+        onEose?.()
+      },
     },
   )
 
