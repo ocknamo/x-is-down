@@ -46,13 +46,12 @@ const svg = `
 
   <!-- Red alert badge -->
   <rect x="430" y="340" width="220" height="52" rx="26" fill="#DC2626"/>
-  <text x="540" y="366"
+  <text x="540" y="375"
         font-family="'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif"
         font-size="26"
         font-weight="700"
         fill="#FFFFFF"
-        text-anchor="middle"
-        dominant-baseline="middle">障害速報</text>
+        text-anchor="middle">障害速報</text>
 
   <!-- Subtitle -->
   <text x="430" y="440"
