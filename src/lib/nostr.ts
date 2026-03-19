@@ -83,7 +83,7 @@ export async function publishPost(content: string): Promise<Event> {
 export function subscribeToTag(
   onEvent: (event: Event) => void,
   onEose?: () => void,
-): () => void {
+): { unsubscribe: () => void; isConnected: () => boolean } {
   console.log('[subscribeToTag] starting subscription, relays:', RELAYS)
   const pool = new SimplePool()
 
@@ -106,8 +106,45 @@ export function subscribeToTag(
     },
   )
 
-  return () => {
-    sub.close()
-    pool.close(RELAYS)
+  return {
+    unsubscribe: () => {
+      sub.close()
+      pool.close(RELAYS)
+    },
+    // pool.relays は protected だが型チェック用にキャスト
+    isConnected: () => RELAYS.some(url => (pool as unknown as { relays: Map<string, { connected: boolean }> }).relays.get(url)?.connected ?? false),
   }
+}
+
+export async function fetchRecentPosts(
+  since: number,
+  onEvent: (event: Event) => void,
+): Promise<void> {
+  return new Promise((resolve) => {
+    console.log('[fetchRecentPosts] fetching since:', since)
+    const pool = new SimplePool()
+
+    let sub: ReturnType<SimplePool['subscribeMany']>
+
+    sub = pool.subscribeMany(
+      RELAYS,
+      {
+        kinds: [1],
+        '#t': [HASHTAG],
+        since,
+      } satisfies Filter,
+      {
+        onevent: (event) => {
+          console.log('[fetchRecentPosts] received event id:', event.id)
+          onEvent(event)
+        },
+        oneose: () => {
+          console.log('[fetchRecentPosts] EOSE received, closing')
+          sub.close()
+          pool.close(RELAYS)
+          resolve()
+        },
+      },
+    )
+  })
 }
