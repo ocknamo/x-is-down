@@ -12,11 +12,20 @@
 
   const { posts, loading }: Props = $props()
 
-  const nostrLinks = [
-    { name: 'Primal', url: `https://primal.net/t/${HASHTAG}` },
-    { name: 'Snort', url: `https://snort.social/t/${HASHTAG}` },
-    { name: 'Iris', url: `https://iris.to/search/${HASHTAG}` },
-  ]
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
+  const nostrLinks = isMobile
+    ? [
+        {
+          name: 'Amethyst',
+          url: 'https://play.google.com/store/apps/details?id=com.vitorpamplona.amethyst',
+        },
+        { name: 'Damus', url: 'https://apps.apple.com/app/damus/id1628663131' },
+      ]
+    : [
+        { name: 'Primal', url: `https://primal.net/t/${HASHTAG}` },
+        { name: 'Nostter', url: `https://nostter.app/search?q=%23${HASHTAG}` },
+      ]
 </script>
 
 <section>

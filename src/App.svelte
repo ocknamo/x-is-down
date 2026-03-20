@@ -37,12 +37,12 @@
     clearInterval(refreshInterval)
   })
 
-  const themes: Theme[] = ['dark', 'dim', 'light']
+  const themes: Theme[] = ['x', 'twitter']
 
   function themeButtonClass(t: Theme): string {
     const active = themeStore.current === t
-    if (active) return 'px-2 py-1 rounded text-xs font-bold bg-sky-500 text-white'
-    return `px-2 py-1 rounded text-xs ${themeStore.subtextClass} hover:text-white transition-colors`
+    if (active) return 'px-3 py-1 rounded-full text-xs font-bold bg-sky-500 text-white'
+    return `px-3 py-1 rounded-full text-xs border ${themeStore.borderClass} ${themeStore.subtextClass} hover:border-sky-500 hover:text-sky-500 transition-colors`
   }
 </script>
 
@@ -63,33 +63,20 @@
         <h1 class="font-bold leading-none">{i18n.t.title}</h1>
         <p class="{themeStore.subtextClass} text-xs">{i18n.t.subtitle}</p>
       </div>
-      <!-- Controls -->
-      <div class="flex items-center gap-2">
-        <!-- Theme toggle -->
-        <div class="flex items-center gap-1">
-          {#each themes as t (t)}
-            <button onclick={() => themeStore.set(t)} class={themeButtonClass(t)}>
-              {t === 'dark' ? i18n.t.themeDark : t === 'dim' ? i18n.t.themeDim : i18n.t.themeLight}
-            </button>
-          {/each}
-        </div>
-        <!-- Language toggle -->
-        <button
-          onclick={() => i18n.toggle()}
-          class="px-2 py-1 rounded text-xs border {themeStore.borderClass} {themeStore.subtextClass} hover:text-sky-500 transition-colors"
-        >
-          {i18n.lang === 'ja' ? 'EN' : 'JA'}
-        </button>
+      <!-- Theme toggle: X / Twitter -->
+      <div class="flex items-center gap-1">
+        {#each themes as t (t)}
+          <button onclick={() => themeStore.set(t)} class={themeButtonClass(t)}>
+            {t === 'x' ? i18n.t.themeX : i18n.t.themeTwitter}
+          </button>
+        {/each}
       </div>
     </div>
   </header>
 
   <!-- Main -->
   <main class="max-w-xl mx-auto">
-    <!-- Post Form -->
     <PostForm onPosted={handleEvent} />
-
-    <!-- Timeline -->
     <Timeline {posts} {loading} />
   </main>
 </div>

@@ -1,5 +1,10 @@
 export type Lang = 'ja' | 'en'
 
+function detectLang(): Lang {
+  const browserLang = navigator.language ?? navigator.languages?.[0] ?? 'en'
+  return browserLang.startsWith('ja') ? 'ja' : 'en'
+}
+
 const messages = {
   ja: {
     title: 'X落ちてる速報',
@@ -17,10 +22,8 @@ const messages = {
     loggedIn: 'ログイン済み',
     logout: 'ログアウト',
     noExtension: 'NIP-07拡張機能が見つかりません',
-    themeLabel: 'テーマ',
-    themeDark: 'ダーク',
-    themeDim: 'ディム',
-    themeLight: 'ライト',
+    themeX: 'X',
+    themeTwitter: 'Twitter',
   },
   en: {
     title: 'X is Down',
@@ -38,22 +41,16 @@ const messages = {
     loggedIn: 'Logged in',
     logout: 'Logout',
     noExtension: 'NIP-07 extension not found',
-    themeLabel: 'Theme',
-    themeDark: 'Dark',
-    themeDim: 'Dim',
-    themeLight: 'Light',
+    themeX: 'X',
+    themeTwitter: 'Twitter',
   },
 } as const
 
 class I18nStore {
-  lang = $state<Lang>('ja')
+  lang = $state<Lang>(detectLang())
 
   get t() {
     return messages[this.lang]
-  }
-
-  toggle() {
-    this.lang = this.lang === 'ja' ? 'en' : 'ja'
   }
 }
 
