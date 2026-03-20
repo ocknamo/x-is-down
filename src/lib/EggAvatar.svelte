@@ -31,13 +31,15 @@
   xmlns="http://www.w3.org/2000/svg"
   aria-hidden="true"
 >
-  <!-- Background circle -->
-  <rect width="40" height="40" rx="20" fill={color} opacity="0.18" />
-  <!-- Egg shape: narrower at top, wider at bottom -->
-  <path
-    d="M20,7 C27,7 33,14 33,23 C33,31 27.5,37 20,37 C12.5,37 7,31 7,23 C7,14 13,7 20,7 Z"
-    fill={color}
-  />
-  <!-- Highlight -->
-  <ellipse cx="15" cy="17" rx="4" ry="5" fill="white" opacity="0.25" />
+  <!-- Background circle (white) -->
+  <rect width="40" height="40" rx="20" fill="#f4f4f5" />
+  <!-- Egg shape: scaled to 70% from center -->
+  <g transform="translate(20,22) scale(0.70) translate(-20,-22)">
+    <path
+      d="M20,7 C27,7 33,14 33,23 C33,31 27.5,37 20,37 C12.5,37 7,31 7,23 C7,14 13,7 20,7 Z"
+      fill={color}
+    />
+    <!-- Highlight -->
+    <ellipse cx="15" cy="17" rx="4" ry="5" fill="white" opacity="0.25" />
+  </g>
 </svg>
