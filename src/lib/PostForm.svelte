@@ -1,6 +1,7 @@
 <script lang="ts">
-  import { publishPost, npub, shortNpub } from './nostr'
+  import { publishPost, npub, publicKey, shortNpub } from './nostr'
   import type { Event } from 'nostr-tools'
+  import EggAvatar from './EggAvatar.svelte'
 
   interface Props {
     onPosted: (event: Event) => void
@@ -34,8 +35,8 @@
 <div class="px-4 py-3 border-b border-zinc-800">
   <div class="flex gap-3">
     <div class="flex-shrink-0">
-      <div class="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center text-white font-bold text-sm">
-        あ
+      <div class="w-10 h-10 rounded-full overflow-hidden">
+        <EggAvatar pubkey={publicKey} size={40} />
       </div>
     </div>
     <div class="flex-1">

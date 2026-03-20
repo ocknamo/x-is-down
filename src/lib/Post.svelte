@@ -2,6 +2,7 @@
   import type { Event } from 'nostr-tools'
   import { nip19 } from 'nostr-tools'
   import { shortNpub, HASHTAG } from './nostr'
+  import EggAvatar from './EggAvatar.svelte'
 
   interface Props {
     event: Event
@@ -22,8 +23,8 @@
 
 <article class="flex gap-3 px-4 py-3 border-b border-zinc-800 hover:bg-zinc-950 transition-colors">
   <div class="flex-shrink-0">
-    <div class="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-white font-bold text-sm">
-      ✕
+    <div class="w-10 h-10 rounded-full overflow-hidden">
+      <EggAvatar pubkey={event.pubkey} size={40} />
     </div>
   </div>
   <div class="flex-1 min-w-0">
