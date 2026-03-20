@@ -45,7 +45,7 @@
         </svg>
       </div>
       <div>
-        <h1 class="font-bold text-white leading-none">落ちた？</h1>
+        <h1 class="font-bold text-white leading-none">おちた？</h1>
         <p class="text-zinc-500 text-xs">X障害時の緊急掲示板 on Nostr</p>
       </div>
     </div>
