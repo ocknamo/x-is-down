@@ -19,23 +19,6 @@ export const HASHTAG = 'xisdown'
 
 const SK_STORAGE_KEY = 'x-is-down:sk'
 
-// NIP-07 window.nostr interface
-interface Nip07Provider {
-  getPublicKey(): Promise<string>
-  signEvent(event: {
-    kind: number
-    created_at: number
-    tags: string[][]
-    content: string
-  }): Promise<Event>
-}
-
-declare global {
-  interface Window {
-    nostr?: Nip07Provider
-  }
-}
-
 function loadOrCreateSecretKey(): Uint8Array {
   const stored = localStorage.getItem(SK_STORAGE_KEY)
   if (stored) {
@@ -54,70 +37,22 @@ export const npub = nip19.npubEncode(publicKey)
 console.log('[nostr] pubkey:', publicKey)
 console.log('[nostr] npub:', npub)
 
-// NIP-07 login state
-export type LoginMode = 'generated' | 'nip07'
-
-class AuthStore {
-  mode = $state<LoginMode>('generated')
-  nip07Pubkey = $state<string | null>(null)
-
-  get currentPubkey(): string {
-    return this.mode === 'nip07' && this.nip07Pubkey ? this.nip07Pubkey : publicKey
-  }
-
-  get currentNpub(): string {
-    return nip19.npubEncode(this.currentPubkey)
-  }
-}
-
-export const authStore = new AuthStore()
-
-export function isNip07Available(): boolean {
-  return typeof window !== 'undefined' && !!window.nostr
-}
-
-export async function loginWithNip07(): Promise<void> {
-  if (!window.nostr) throw new Error('NIP-07 extension not found')
-  const pk = await window.nostr.getPublicKey()
-  authStore.nip07Pubkey = pk
-  authStore.mode = 'nip07'
-  console.log('[nostr] NIP-07 login, pubkey:', pk)
-}
-
-export function logout(): void {
-  authStore.mode = 'generated'
-  authStore.nip07Pubkey = null
-  console.log('[nostr] logged out, using generated key')
-}
-
 export function shortNpub(npubStr: string): string {
   return `${npubStr.slice(0, 8)}...${npubStr.slice(-4)}`
 }
 
 export async function publishPost(content: string): Promise<Event> {
-  let event: Event
-
-  if (authStore.mode === 'nip07' && window.nostr) {
-    const unsigned = {
+  const event = finalizeEvent(
+    {
       kind: 1,
       created_at: Math.floor(Date.now() / 1000),
       tags: [['t', HASHTAG]],
       content,
-    }
-    event = await window.nostr.signEvent(unsigned)
-    console.log('[publishPost] NIP-07 signed event:', JSON.stringify(event, null, 2))
-  } else {
-    event = finalizeEvent(
-      {
-        kind: 1,
-        created_at: Math.floor(Date.now() / 1000),
-        tags: [['t', HASHTAG]],
-        content,
-      },
-      secretKey,
-    )
-    console.log('[publishPost] finalized event:', JSON.stringify(event, null, 2))
-  }
+    },
+    secretKey,
+  )
+
+  console.log('[publishPost] finalized event:', JSON.stringify(event, null, 2))
 
   const pool = new SimplePool()
   const results = pool.publish(RELAYS, event)
