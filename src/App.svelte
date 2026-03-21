@@ -5,6 +5,7 @@
   import { addUniqueEvent } from './lib/utils'
   import PostForm from './lib/PostForm.svelte'
   import Timeline from './lib/Timeline.svelte'
+  import NostrPromo from './lib/NostrPromo.svelte'
   import { t } from './lib/i18n'
 
   let posts = $state<Event[]>([])
@@ -82,4 +83,8 @@
     <!-- Timeline -->
     <Timeline {posts} {loading} {profiles} />
   </main>
+
+  <footer class="max-w-xl mx-auto px-4 py-4 flex justify-center border-t border-zinc-900 mt-2">
+    <NostrPromo />
+  </footer>
 </div>

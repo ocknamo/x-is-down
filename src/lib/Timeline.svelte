@@ -3,6 +3,7 @@
   import Post from './Post.svelte'
   import type { UserProfile } from './nostr'
   import { t } from './i18n'
+  import NostrPromo from './NostrPromo.svelte'
 
   interface Props {
     posts: Event[]
@@ -14,9 +15,12 @@
 </script>
 
 <section>
-  <div class="px-4 py-3 border-b border-zinc-800">
-    <h2 class="font-bold text-white">{t.timelineTitle}</h2>
-    <p class="text-zinc-500 text-sm">{t.timelineSubtitle}</p>
+  <div class="px-4 py-3 border-b border-zinc-800 flex items-end justify-between">
+    <div>
+      <h2 class="font-bold text-white">{t.timelineTitle}</h2>
+      <p class="text-zinc-500 text-sm">{t.timelineSubtitle}</p>
+    </div>
+    <NostrPromo />
   </div>
 
   {#if loading}
