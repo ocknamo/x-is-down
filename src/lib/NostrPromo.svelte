@@ -45,7 +45,7 @@
   onclick={openDialog}
   class="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
 >
-  {t.openInClient}
+  {t.openInClient} ↗
 </button>
 
 <!-- svelte-ignore a11y_click_events_have_key_events a11y_no_noninteractive_element_interactions -->

@@ -15,7 +15,7 @@
 </script>
 
 <section>
-  <div class="px-4 py-3 border-b border-zinc-800 flex items-center justify-between">
+  <div class="px-4 py-3 border-b border-zinc-800 flex items-end justify-between">
     <div>
       <h2 class="font-bold text-white">{t.timelineTitle}</h2>
       <p class="text-zinc-500 text-sm">{t.timelineSubtitle}</p>
