@@ -7,6 +7,21 @@ import {
 } from 'nostr-tools'
 import type { Event, Filter } from 'nostr-tools'
 
+declare global {
+  interface Window {
+    nostr?: {
+      getPublicKey(): Promise<string>
+      signEvent(event: {
+        kind: number
+        created_at: number
+        tags: string[][]
+        content: string
+        pubkey: string
+      }): Promise<Event>
+    }
+  }
+}
+
 export const RELAYS = [
   'wss://relay.damus.io',
   'wss://nos.lol',
@@ -41,16 +56,37 @@ export function shortNpub(npubStr: string): string {
   return `${npubStr.slice(0, 8)}...${npubStr.slice(-4)}`
 }
 
-export async function publishPost(content: string): Promise<Event> {
-  const event = finalizeEvent(
-    {
+export function isNip07Available(): boolean {
+  return typeof window !== 'undefined' && typeof window.nostr !== 'undefined'
+}
+
+export async function getNip07PublicKey(): Promise<string> {
+  if (!window.nostr) throw new Error('NIP-07 extension not available')
+  return window.nostr.getPublicKey()
+}
+
+export async function publishPost(content: string, nip07Pubkey?: string): Promise<Event> {
+  let event: Event
+
+  if (nip07Pubkey && window.nostr) {
+    event = await window.nostr.signEvent({
       kind: 1,
       created_at: Math.floor(Date.now() / 1000),
       tags: [['t', HASHTAG]],
       content,
-    },
-    secretKey,
-  )
+      pubkey: nip07Pubkey,
+    })
+  } else {
+    event = finalizeEvent(
+      {
+        kind: 1,
+        created_at: Math.floor(Date.now() / 1000),
+        tags: [['t', HASHTAG]],
+        content,
+      },
+      secretKey,
+    )
+  }
 
   console.log('[publishPost] finalized event:', JSON.stringify(event, null, 2))
 
