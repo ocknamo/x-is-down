@@ -52,7 +52,7 @@
 <dialog
   bind:this={dialog}
   onclick={handleBackdropClick}
-  class="bg-zinc-900 text-white rounded-xl border border-zinc-700 p-5 w-80 max-w-[90vw] backdrop:bg-black/60"
+  class="m-auto bg-zinc-900 text-white rounded-xl border border-zinc-700 p-5 w-80 max-w-[90vw] backdrop:bg-black/60"
 >
   <div class="flex items-center justify-between mb-4">
     <h2 class="font-bold text-sm">{t.openInClient}</h2>
