@@ -17,6 +17,8 @@ const translations = {
     timelineSubtitle: '#xisdown タグの投稿',
     noPosts: 'まだ投稿がありません',
     noPostsCallToAction: '最初に「X落ちてる」と投稿しよう！',
+    openInClient: '別のクライアントで開く',
+    close: '閉じる',
   },
   en: {
     appTitle: 'X is Down',
@@ -33,6 +35,8 @@ const translations = {
     timelineSubtitle: 'Posts with #xisdown tag',
     noPosts: 'No posts yet',
     noPostsCallToAction: 'Be the first to post "X is down"!',
+    openInClient: 'Open in another client',
+    close: 'Close',
   },
 } as const
 
