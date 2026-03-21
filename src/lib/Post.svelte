@@ -1,17 +1,18 @@
 <script lang="ts">
   import type { Event } from 'nostr-tools'
   import { nip19 } from 'nostr-tools'
-  import { shortNpub, HASHTAG } from './nostr'
+  import { shortNpub, HASHTAG, type UserProfile } from './nostr'
   import EggAvatar from './EggAvatar.svelte'
 
   interface Props {
     event: Event
+    profile?: UserProfile
   }
 
-  const { event }: Props = $props()
+  const { event, profile }: Props = $props()
 
   const npubStr = $derived(nip19.npubEncode(event.pubkey))
-  const displayName = $derived(shortNpub(npubStr))
+  const displayName = $derived(profile?.display_name ?? profile?.name ?? shortNpub(npubStr))
   const date = $derived(new Date(event.created_at * 1000))
   const timeStr = $derived(date.toLocaleString('ja-JP', {
     month: 'numeric',
@@ -24,7 +25,11 @@
 <article class="flex gap-3 px-4 py-3 border-b border-zinc-800 hover:bg-zinc-950 transition-colors">
   <div class="flex-shrink-0">
     <div class="w-10 h-10 rounded-full overflow-hidden">
-      <EggAvatar pubkey={event.pubkey} size={40} />
+      {#if profile?.picture}
+        <img src={profile.picture} alt={displayName} class="w-10 h-10 rounded-full object-cover" />
+      {:else}
+        <EggAvatar pubkey={event.pubkey} size={40} />
+      {/if}
     </div>
   </div>
   <div class="flex-1 min-w-0">

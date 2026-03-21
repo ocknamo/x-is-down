@@ -7,6 +7,12 @@ import {
 } from 'nostr-tools'
 import type { Event, Filter } from 'nostr-tools'
 
+export interface UserProfile {
+  name?: string
+  display_name?: string
+  picture?: string
+}
+
 declare global {
   interface Window {
     nostr?: {
@@ -180,5 +186,57 @@ export async function fetchRecentPosts(
         },
       },
     )
+  })
+}
+
+export async function fetchUserProfiles(pubkeys: string[]): Promise<Map<string, UserProfile>> {
+  return new Promise((resolve) => {
+    if (pubkeys.length === 0) {
+      resolve(new Map())
+      return
+    }
+
+    console.log('[fetchUserProfiles] fetching kind0 for', pubkeys.length, 'pubkeys')
+    const pool = new SimplePool()
+    const collected = new Map<string, Event[]>()
+
+    const finish = () => {
+      sub.close()
+      pool.close(RELAYS)
+
+      const profiles = new Map<string, UserProfile>()
+      for (const [pubkey, events] of collected) {
+        const latest = events.reduce((a, b) => (a.created_at >= b.created_at ? a : b))
+        try {
+          const profile = JSON.parse(latest.content) as UserProfile
+          profiles.set(pubkey, profile)
+        } catch {
+          // ignore parse errors
+        }
+      }
+
+      console.log('[fetchUserProfiles] resolved', profiles.size, 'profiles')
+      resolve(profiles)
+    }
+
+    const timeout = setTimeout(finish, 5000)
+
+    const sub = pool.subscribeMany(
+      RELAYS,
+      { kinds: [0], authors: pubkeys } satisfies Filter,
+      {
+        onevent: (event) => {
+          console.log('[fetchUserProfiles] received kind0 for pubkey:', event.pubkey)
+          const existing = collected.get(event.pubkey) ?? []
+          collected.set(event.pubkey, [...existing, event])
+        },
+        oneose: () => {
+          console.log('[fetchUserProfiles] EOSE received, waiting until 5s timeout')
+        },
+      },
+    )
+
+    // Ensure timeout is cleared if finish() is called early (not currently, but safe)
+    void timeout
   })
 }

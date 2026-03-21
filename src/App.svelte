@@ -1,22 +1,44 @@
 <script lang="ts">
   import { onDestroy } from 'svelte'
   import type { Event } from 'nostr-tools'
-  import { subscribeToTag, fetchRecentPosts } from './lib/nostr'
+  import { subscribeToTag, fetchRecentPosts, fetchUserProfiles, type UserProfile } from './lib/nostr'
   import { addUniqueEvent } from './lib/utils'
   import PostForm from './lib/PostForm.svelte'
   import Timeline from './lib/Timeline.svelte'
 
   let posts = $state<Event[]>([])
   let loading = $state(true)
+  let profiles = $state<Map<string, UserProfile>>(new Map())
+  const fetchedPubkeys = new Set<string>()
+
+  async function loadProfiles(pubkeys: string[]) {
+    const newPubkeys = pubkeys.filter((pk) => !fetchedPubkeys.has(pk))
+    if (newPubkeys.length === 0) return
+    for (const pk of newPubkeys) fetchedPubkeys.add(pk)
+
+    const result = await fetchUserProfiles(newPubkeys)
+    if (result.size > 0) {
+      profiles = new Map([...profiles, ...result])
+    }
+  }
 
   function handleEvent(event: Event) {
     posts = addUniqueEvent(posts, event)
+    if (!fetchedPubkeys.has(event.pubkey)) {
+      loadProfiles([event.pubkey]).catch((e: unknown) =>
+        console.error('[profiles] fetchUserProfiles failed:', e),
+      )
+    }
   }
 
   let refreshInterval: ReturnType<typeof setInterval> | undefined
 
   const { unsubscribe } = subscribeToTag(handleEvent, () => {
     loading = false
+    const pubkeys = [...new Set(posts.map((p) => p.pubkey))]
+    loadProfiles(pubkeys).catch((e: unknown) =>
+      console.error('[profiles] initial fetchUserProfiles failed:', e),
+    )
     refreshInterval = setInterval(() => {
       console.log('[refresh] fetching recent posts')
       const since = posts.length > 0
@@ -57,6 +79,6 @@
     <PostForm onPosted={handleEvent} />
 
     <!-- Timeline -->
-    <Timeline {posts} {loading} />
+    <Timeline {posts} {loading} {profiles} />
   </main>
 </div>
