@@ -5,6 +5,7 @@
   import { addUniqueEvent } from './lib/utils'
   import PostForm from './lib/PostForm.svelte'
   import Timeline from './lib/Timeline.svelte'
+  import { t } from './lib/i18n'
 
   let posts = $state<Event[]>([])
   let loading = $state(true)
@@ -67,8 +68,8 @@
         </svg>
       </div>
       <div>
-        <h1 class="font-bold text-white leading-none">X落ちてる速報</h1>
-        <p class="text-zinc-500 text-xs">X障害時の緊急掲示板 on Nostr</p>
+        <h1 class="font-bold text-white leading-none">{t.appTitle}</h1>
+        <p class="text-zinc-500 text-xs">{t.appSubtitle}</p>
       </div>
     </div>
   </header>

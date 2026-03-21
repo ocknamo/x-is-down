@@ -2,6 +2,7 @@
   import type { Event } from 'nostr-tools'
   import Post from './Post.svelte'
   import type { UserProfile } from './nostr'
+  import { t } from './i18n'
 
   interface Props {
     posts: Event[]
@@ -14,8 +15,8 @@
 
 <section>
   <div class="px-4 py-3 border-b border-zinc-800">
-    <h2 class="font-bold text-white">みんなの「X落ちてる」</h2>
-    <p class="text-zinc-500 text-sm">#xisdown タグの投稿</p>
+    <h2 class="font-bold text-white">{t.timelineTitle}</h2>
+    <p class="text-zinc-500 text-sm">{t.timelineSubtitle}</p>
   </div>
 
   {#if loading}
@@ -24,8 +25,8 @@
     </div>
   {:else if posts.length === 0}
     <div class="px-4 py-8 text-center text-zinc-500">
-      <p>まだ投稿がありません</p>
-      <p class="text-sm mt-1">最初に「X落ちてる」と投稿しよう！</p>
+      <p>{t.noPosts}</p>
+      <p class="text-sm mt-1">{t.noPostsCallToAction}</p>
     </div>
   {:else}
     {#each posts as event (event.id)}

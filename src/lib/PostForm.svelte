@@ -4,6 +4,7 @@
   import type { Event } from 'nostr-tools'
   import { publishPost, npub, publicKey, shortNpub, isNip07Available, getNip07PublicKey } from './nostr'
   import EggAvatar from './EggAvatar.svelte'
+  import { t } from './i18n'
 
   interface Props {
     onPosted: (event: Event) => void
@@ -11,7 +12,7 @@
 
   const { onPosted }: Props = $props()
 
-  let postText = $state('X落ちてる')
+  let postText = $state(t.defaultPostText)
   let isPosting = $state(false)
   let error = $state('')
   let nip07Available = $state(false)
@@ -52,9 +53,9 @@
     try {
       const event = await publishPost(postText, nip07Pubkey ?? undefined)
       onPosted(event)
-      postText = 'X落ちてる'
+      postText = t.defaultPostText
     } catch (e) {
-      error = '投稿に失敗しました。リレーに接続できません。'
+      error = t.postError
       console.error(e)
     } finally {
       isPosting = false
@@ -69,17 +70,17 @@
         onclick={loginWithNip07}
         class="text-xs text-sky-500 hover:text-sky-400 border border-sky-500 hover:border-sky-400 px-3 py-1 rounded-full transition-colors"
       >
-        Nostr拡張機能でログイン
+        {t.loginWithNostr}
       </button>
     </div>
   {:else if nip07Pubkey}
     <div class="mb-3 flex justify-end items-center gap-2">
-      <span class="text-xs text-zinc-500">NIP-07でログイン中</span>
+      <span class="text-xs text-zinc-500">{t.loggedInWithNip07}</span>
       <button
         onclick={logout}
         class="text-xs text-zinc-500 hover:text-zinc-400 transition-colors"
       >
-        ログアウト
+        {t.logout}
       </button>
     </div>
   {/if}
@@ -94,7 +95,7 @@
       <textarea
         bind:value={postText}
         rows="3"
-        placeholder="X落ちてる"
+        placeholder={t.postPlaceholder}
         class="w-full bg-transparent text-white text-xl placeholder-zinc-600 resize-none outline-none leading-relaxed"
       ></textarea>
       {#if error}
@@ -106,7 +107,7 @@
           disabled={isPosting || !postText.trim()}
           class="bg-sky-500 hover:bg-sky-400 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold px-5 py-2 rounded-full transition-colors text-sm"
         >
-          {isPosting ? '投稿中...' : '投稿する'}
+          {isPosting ? t.posting : t.post}
         </button>
       </div>
     </div>
