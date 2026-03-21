@@ -1,13 +1,15 @@
 <script lang="ts">
   import type { Event } from 'nostr-tools'
   import Post from './Post.svelte'
+  import type { UserProfile } from './nostr'
 
   interface Props {
     posts: Event[]
     loading: boolean
+    profiles: Map<string, UserProfile>
   }
 
-  const { posts, loading }: Props = $props()
+  const { posts, loading, profiles }: Props = $props()
 </script>
 
 <section>
@@ -27,7 +29,7 @@
     </div>
   {:else}
     {#each posts as event (event.id)}
-      <Post {event} />
+      <Post {event} profile={profiles.get(event.pubkey)} />
     {/each}
   {/if}
 </section>
