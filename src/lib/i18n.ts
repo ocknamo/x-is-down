@@ -3,7 +3,7 @@ const isJapanese =
 
 const translations = {
   ja: {
-    appTitle: 'X落ちてる速報',
+    appTitle: 'X落ちてる？',
     appSubtitle: 'X障害時の緊急掲示板 on Nostr',
     loginWithNostr: 'Nostr拡張機能でログイン',
     loggedInWithNip07: 'NIP-07でログイン中',
