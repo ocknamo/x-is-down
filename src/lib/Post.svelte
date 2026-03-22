@@ -22,7 +22,7 @@
   }))
 </script>
 
-<article class="flex gap-3 px-4 py-3 border-b border-zinc-800 hover:bg-zinc-950 transition-colors">
+<article class="flex gap-3 px-4 py-3 border-b border-theme hover:bg-theme-hover transition-colors">
   <div class="flex-shrink-0">
     <div class="w-10 h-10 rounded-full overflow-hidden">
       {#if profile?.picture}
@@ -34,12 +34,12 @@
   </div>
   <div class="flex-1 min-w-0">
     <div class="flex items-center gap-2 mb-1">
-      <span class="font-bold text-sm text-white truncate">{displayName}</span>
-      <span class="text-zinc-500 text-sm flex-shrink-0">· {timeStr}</span>
+      <span class="font-bold text-sm text-theme truncate">{displayName}</span>
+      <span class="text-theme-muted text-sm flex-shrink-0">· {timeStr}</span>
     </div>
-    <p class="text-white text-sm leading-relaxed whitespace-pre-wrap break-words">{event.content}</p>
+    <p class="text-theme text-sm leading-relaxed whitespace-pre-wrap break-words">{event.content}</p>
     <div class="mt-1">
-      <span class="text-sky-500 text-sm">#{HASHTAG}</span>
+      <span class="text-theme-accent text-sm">#{HASHTAG}</span>
     </div>
   </div>
 </article>

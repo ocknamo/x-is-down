@@ -1,3 +1,5 @@
+import type { Theme } from './theme.svelte'
+
 const isJapanese =
   typeof navigator !== 'undefined' && navigator.language.startsWith('ja')
 
@@ -39,5 +41,33 @@ const translations = {
     close: 'Close',
   },
 } as const
+
+const twitterOverrides = {
+  ja: {
+    appTitle: 'Twitter落ちてる？',
+    appSubtitle: 'Twitter障害時の緊急掲示板 on Nostr',
+    defaultPostText: 'Twitter落ちてる',
+    postPlaceholder: 'Twitter落ちてる',
+    timelineTitle: 'みんなの「Twitter落ちてる」',
+    noPostsCallToAction: '最初に「Twitter落ちてる」と投稿しよう！',
+  },
+  en: {
+    appTitle: 'Twitter is Down',
+    appSubtitle: 'Emergency bulletin board on Nostr',
+    defaultPostText: 'Twitter is down',
+    postPlaceholder: 'Twitter is down',
+    timelineTitle: '"Twitter is Down" Timeline',
+    noPostsCallToAction: 'Be the first to post "Twitter is down"!',
+  },
+}
+
+export function getTranslations(currentTheme: Theme) {
+  const base = isJapanese ? translations.ja : translations.en
+  if (currentTheme === 'twitter') {
+    const overrides = isJapanese ? twitterOverrides.ja : twitterOverrides.en
+    return { ...base, ...overrides }
+  }
+  return base
+}
 
 export const t = isJapanese ? translations.ja : translations.en

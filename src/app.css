@@ -1,12 +1,101 @@
 @import "tailwindcss";
 
+/* X Theme (dark) */
+html[data-theme="x"] {
+  --bg: #000000;
+  --bg-overlay: rgba(0, 0, 0, 0.8);
+  --bg-card: #000000;
+  --bg-dialog: #18181b;
+  --border: #27272a;
+  --border-subtle: #18181b;
+  --border-dialog: #3f3f46;
+  --text: #ffffff;
+  --text-muted: #71717a;
+  --text-faint: #52525b;
+  --hover: #09090b;
+  --accent: #0ea5e9;
+  --accent-hover: #38bdf8;
+  --logo: #ffffff;
+}
+
+/* Twitter Theme (light) */
+html[data-theme="twitter"] {
+  --bg: #ffffff;
+  --bg-overlay: rgba(255, 255, 255, 0.85);
+  --bg-card: #ffffff;
+  --bg-dialog: #ffffff;
+  --border: #e1e8ed;
+  --border-subtle: #e1e8ed;
+  --border-dialog: #ccd6dd;
+  --text: #14171a;
+  --text-muted: #657786;
+  --text-faint: #aab8c2;
+  --hover: #f5f8fa;
+  --accent: #1da1f2;
+  --accent-hover: #1991da;
+  --logo: #1da1f2;
+}
+
+@utility bg-theme {
+  background-color: var(--bg);
+}
+@utility bg-theme-overlay {
+  background-color: var(--bg-overlay);
+}
+@utility bg-theme-card {
+  background-color: var(--bg-card);
+}
+@utility bg-theme-dialog {
+  background-color: var(--bg-dialog);
+}
+@utility bg-theme-hover {
+  background-color: var(--hover);
+}
+@utility bg-theme-accent {
+  background-color: var(--accent);
+}
+
+@utility text-theme {
+  color: var(--text);
+}
+@utility text-theme-muted {
+  color: var(--text-muted);
+}
+@utility text-theme-faint {
+  color: var(--text-faint);
+}
+@utility text-theme-accent {
+  color: var(--accent);
+}
+@utility text-theme-logo {
+  color: var(--logo);
+}
+
+@utility border-theme {
+  border-color: var(--border);
+}
+@utility border-theme-subtle {
+  border-color: var(--border-subtle);
+}
+@utility border-theme-dialog {
+  border-color: var(--border-dialog);
+}
+@utility border-theme-accent {
+  border-color: var(--accent);
+}
+
+@utility fill-theme-logo {
+  fill: var(--logo);
+}
+
 @layer base {
   * {
     box-sizing: border-box;
   }
 
   body {
-    @apply bg-black text-white;
+    background-color: var(--bg);
+    color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
 }
