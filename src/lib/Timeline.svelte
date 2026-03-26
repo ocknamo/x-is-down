@@ -21,12 +21,12 @@
 </script>
 
 <section>
-  <div class="px-4 py-3 border-b border-theme flex items-center gap-2">
+  <div class="px-4 py-3 border-b border-theme flex items-stretch gap-2">
     <div class="flex-1 min-w-0">
       <h2 class="font-bold text-theme">{t.timelineTitle}</h2>
       <p class="text-theme-muted text-sm">{t.timelineSubtitle}</p>
     </div>
-    <div class="flex flex-col items-end gap-1 flex-shrink-0">
+    <div class="flex flex-col items-end justify-between flex-shrink-0">
       <button
         onclick={onToggleEarthquake}
         role="switch"
