@@ -21,18 +21,15 @@
 </script>
 
 <section>
-  <div class="px-4 py-3 border-b border-theme flex items-stretch gap-2">
-    <div class="flex-1 min-w-0">
-      <h2 class="font-bold text-theme">{t.timelineTitle}</h2>
-      <p class="text-theme-muted text-sm">{t.timelineSubtitle}</p>
-    </div>
-    <div class="flex flex-col items-end justify-between flex-shrink-0">
+  <div class="px-4 py-3 border-b border-theme" style="display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 8px;">
+    <h2 class="font-bold text-theme" style="grid-column: 1; grid-row: 1;">{t.timelineTitle}</h2>
+    <div style="grid-column: 2; grid-row: 1; display: flex; align-items: flex-start; justify-content: flex-end;">
       <button
         onclick={onToggleEarthquake}
         role="switch"
         aria-checked={showEarthquake}
         class="transition-opacity"
-        style="display: inline-flex; flex-direction: row; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap; flex-shrink: 0;"
+        style="display: inline-flex; flex-direction: row; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;"
         class:opacity-40={!showEarthquake}
         title={showEarthquake ? '地震速報を非表示' : '地震速報を表示'}
       >
@@ -44,6 +41,9 @@
           <span style="position: absolute; top: 2px; width: 10px; height: 10px; border-radius: 9999px; background: white; transition: left 0.15s;" style:left={showEarthquake ? '14px' : '2px'}></span>
         </span>
       </button>
+    </div>
+    <p class="text-theme-muted text-sm" style="grid-column: 1; grid-row: 2;">{t.timelineSubtitle}</p>
+    <div style="grid-column: 2; grid-row: 2; display: flex; align-items: flex-end; justify-content: flex-end;">
       <NostrPromo />
     </div>
   </div>
