@@ -7,9 +7,10 @@
   interface Props {
     event: Event
     profile?: UserProfile
+    isEarthquake?: boolean
   }
 
-  const { event, profile }: Props = $props()
+  const { event, profile, isEarthquake = false }: Props = $props()
 
   const npubStr = $derived(nip19.npubEncode(event.pubkey))
   const displayName = $derived(profile?.display_name ?? profile?.name ?? shortNpub(npubStr))
@@ -39,7 +40,11 @@
     </div>
     <p class="text-theme text-sm leading-relaxed whitespace-pre-wrap break-words">{event.content}</p>
     <div class="mt-1">
-      <span class="text-theme-accent text-sm">#{HASHTAG}</span>
+      {#if isEarthquake}
+        <span class="text-orange-500 text-xs font-bold">⚠ 地震速報</span>
+      {:else}
+        <span class="text-theme-accent text-sm">#{HASHTAG}</span>
+      {/if}
     </div>
   </div>
 </article>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import type { Event } from 'nostr-tools'
-  import { subscribeToTag, fetchRecentPosts, fetchUserProfiles, type UserProfile } from './lib/nostr'
+  import { subscribeToTag, fetchRecentPosts, fetchUserProfiles, subscribeToEarthquakeAccounts, EARTHQUAKE_PUBKEYS, type UserProfile } from './lib/nostr'
   import { addUniqueEvent } from './lib/utils'
   import PostForm from './lib/PostForm.svelte'
   import Timeline from './lib/Timeline.svelte'
@@ -12,6 +12,19 @@
   let loading = $state(true)
   let profiles = $state<Map<string, UserProfile>>(new Map())
   const fetchedPubkeys = new Set<string>()
+
+  const earthquakePostIds = new Set<string>()
+  const EQ_TOGGLE_KEY = 'x-is-down:showEarthquake'
+  let showEarthquake = $state(localStorage.getItem(EQ_TOGGLE_KEY) !== 'false')
+  function toggleEarthquake() {
+    showEarthquake = !showEarthquake
+    localStorage.setItem(EQ_TOGGLE_KEY, String(showEarthquake))
+  }
+  const visiblePosts = $derived(
+    showEarthquake
+      ? posts
+      : posts.filter((p) => !earthquakePostIds.has(p.id))
+  )
 
   onMount(() => {
     initTheme()
@@ -26,6 +39,11 @@
     if (result.size > 0) {
       profiles = new Map([...profiles, ...result])
     }
+  }
+
+  function handleEarthquakeEvent(event: Event) {
+    earthquakePostIds.add(event.id)
+    handleEvent(event)
   }
 
   function handleEvent(event: Event) {
@@ -57,8 +75,18 @@
     }, 60_000)
   })
 
+  const { unsubscribe: unsubscribeEq } = subscribeToEarthquakeAccounts(
+    handleEarthquakeEvent,
+    () => {
+      loadProfiles(EARTHQUAKE_PUBKEYS).catch((e: unknown) =>
+        console.error('[profiles] earthquake fetchUserProfiles failed:', e),
+      )
+    },
+  )
+
   onDestroy(() => {
     unsubscribe()
+    unsubscribeEq()
     clearInterval(refreshInterval)
   })
 </script>
@@ -91,6 +119,20 @@
         </p>
       </div>
       <button
+        onclick={toggleEarthquake}
+        class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors"
+        class:text-orange-500={showEarthquake}
+        class:text-theme-faint={!showEarthquake}
+        class:opacity-40={!showEarthquake}
+        title={showEarthquake ? '地震速報を非表示' : '地震速報を表示'}
+        aria-label={showEarthquake ? 'Hide earthquake alerts' : 'Show earthquake alerts'}
+        aria-pressed={showEarthquake}
+      >
+        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="2,12 5,12 7,5 9,19 11,8 13,16 15,12 22,12"/>
+        </svg>
+      </button>
+      <button
         onclick={toggleTheme}
         class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors text-theme-muted hover:text-theme-accent"
         title={theme() === 'x' ? 'Twitterテーマに切り替え' : 'Xテーマに切り替え'}
@@ -119,7 +161,7 @@
     <PostForm onPosted={handleEvent} />
 
     <!-- Timeline -->
-    <Timeline {posts} {loading} {profiles} />
+    <Timeline posts={visiblePosts} {loading} {profiles} {earthquakePostIds} />
   </main>
 
   <footer class="max-w-xl mx-auto px-4 py-4 flex justify-center border-t border-theme-subtle mt-2">

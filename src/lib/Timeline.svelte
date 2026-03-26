@@ -10,9 +10,10 @@
     posts: Event[]
     loading: boolean
     profiles: Map<string, UserProfile>
+    earthquakePostIds: Set<string>
   }
 
-  const { posts, loading, profiles }: Props = $props()
+  const { posts, loading, profiles, earthquakePostIds }: Props = $props()
 
   const t = $derived(getTranslations(theme()))
 </script>
@@ -37,7 +38,7 @@
     </div>
   {:else}
     {#each posts as event (event.id)}
-      <Post {event} profile={profiles.get(event.pubkey)} />
+      <Post {event} profile={profiles.get(event.pubkey)} isEarthquake={earthquakePostIds.has(event.id)} />
     {/each}
   {/if}
 </section>

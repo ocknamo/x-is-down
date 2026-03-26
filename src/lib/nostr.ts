@@ -38,6 +38,14 @@ export const RELAYS = [
 
 export const HASHTAG = 'xisdown'
 
+export const EARTHQUAKE_NPUBS = [
+  'npub1namazu7um9xvgfpax6yrk9tl3segxpgac67jx7cuttzqp7usem9sqavlhz',
+  'npub1p92agfqsynk3lv8mturqwaq68wpvat55qsf72e3j97wkrnyy9hhsxczd3x',
+]
+export const EARTHQUAKE_PUBKEYS = EARTHQUAKE_NPUBS.map(
+  (n) => nip19.decode(n).data as string,
+)
+
 const SK_STORAGE_KEY = 'x-is-down:sk'
 
 function loadOrCreateSecretKey(): Uint8Array {
@@ -187,6 +195,40 @@ export async function fetchRecentPosts(
       },
     )
   })
+}
+
+export function subscribeToEarthquakeAccounts(
+  onEvent: (event: Event) => void,
+  onEose?: () => void,
+): { unsubscribe: () => void } {
+  console.log('[subscribeToEarthquakeAccounts] starting subscription, pubkeys:', EARTHQUAKE_PUBKEYS)
+  const pool = new SimplePool()
+
+  const sub = pool.subscribeMany(
+    RELAYS,
+    {
+      kinds: [1],
+      authors: EARTHQUAKE_PUBKEYS,
+      limit: 20,
+    } satisfies Filter,
+    {
+      onevent: (event) => {
+        console.log('[subscribeToEarthquakeAccounts] received event id:', event.id, 'pubkey:', event.pubkey)
+        onEvent(event)
+      },
+      oneose: () => {
+        console.log('[subscribeToEarthquakeAccounts] EOSE received')
+        onEose?.()
+      },
+    },
+  )
+
+  return {
+    unsubscribe: () => {
+      sub.close()
+      pool.close(RELAYS)
+    },
+  }
 }
 
 export async function fetchUserProfiles(pubkeys: string[]): Promise<Map<string, UserProfile>> {
