@@ -119,20 +119,6 @@
         </p>
       </div>
       <button
-        onclick={toggleEarthquake}
-        class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors"
-        class:text-orange-500={showEarthquake}
-        class:text-theme-faint={!showEarthquake}
-        class:opacity-40={!showEarthquake}
-        title={showEarthquake ? '地震速報を非表示' : '地震速報を表示'}
-        aria-label={showEarthquake ? 'Hide earthquake alerts' : 'Show earthquake alerts'}
-        aria-pressed={showEarthquake}
-      >
-        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polyline points="2,12 5,12 7,5 9,19 11,8 13,16 15,12 22,12"/>
-        </svg>
-      </button>
-      <button
         onclick={toggleTheme}
         class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full transition-colors text-theme-muted hover:text-theme-accent"
         title={theme() === 'x' ? 'Twitterテーマに切り替え' : 'Xテーマに切り替え'}
@@ -161,7 +147,7 @@
     <PostForm onPosted={handleEvent} />
 
     <!-- Timeline -->
-    <Timeline posts={visiblePosts} {loading} {profiles} {earthquakePostIds} />
+    <Timeline posts={visiblePosts} {loading} {profiles} {earthquakePostIds} {showEarthquake} onToggleEarthquake={toggleEarthquake} />
   </main>
 
   <footer class="max-w-xl mx-auto px-4 py-4 flex justify-center border-t border-theme-subtle mt-2">
