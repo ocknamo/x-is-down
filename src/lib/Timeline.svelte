@@ -30,14 +30,14 @@
         aria-checked={showEarthquake}
         class="transition-opacity"
         style="display: inline-flex; flex-direction: row; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;"
-        class:opacity-40={!showEarthquake}
+        class:opacity-50={!showEarthquake}
         title={showEarthquake ? '地震速報を非表示' : '地震速報を表示'}
       >
         <svg viewBox="0 0 24 24" style="width: 12px; height: 12px; flex-shrink: 0;" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-orange-500">
           <polyline points="2,12 5,12 7,5 9,19 11,8 13,16 15,12 22,12"/>
         </svg>
-        <span class="text-theme-muted">地震速報</span>
-        <span style="position: relative; display: inline-flex; width: 26px; height: 14px; border-radius: 9999px; flex-shrink: 0;" class="transition-colors {showEarthquake ? 'bg-orange-500' : 'bg-gray-400'}">
+        <span class="text-theme">地震速報</span>
+        <span style="position: relative; display: inline-flex; width: 26px; height: 14px; border-radius: 9999px; flex-shrink: 0;" class="transition-colors {showEarthquake ? 'bg-orange-500' : 'bg-gray-500'}">
           <span style="position: absolute; top: 2px; width: 10px; height: 10px; border-radius: 9999px; background: white; transition: left 0.15s;" style:left={showEarthquake ? '14px' : '2px'}></span>
         </span>
       </button>
