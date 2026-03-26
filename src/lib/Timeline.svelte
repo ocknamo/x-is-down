@@ -38,7 +38,7 @@
         </svg>
         <span class="text-theme-muted">地震速報</span>
         <span style:background={showEarthquake ? '#f97316' : '#6b7280'} style:border={showEarthquake ? '1px solid #ea580c' : '1px solid #4b5563'} style="position: relative; display: inline-flex; width: 26px; height: 14px; border-radius: 9999px; flex-shrink: 0; transition: background 0.15s, border-color 0.15s;">
-          <span style:left={showEarthquake ? '13px' : '2px'} style="position: absolute; top: 2px; width: 10px; height: 10px; border-radius: 9999px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); transition: left 0.15s;"></span>
+          <span style:left={showEarthquake ? '13px' : '2px'} style="position: absolute; top: 1px; width: 10px; height: 10px; border-radius: 9999px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); transition: left 0.15s;"></span>
         </span>
       </button>
     </div>
