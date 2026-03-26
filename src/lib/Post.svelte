@@ -21,6 +21,22 @@
     hour: '2-digit',
     minute: '2-digit',
   }))
+
+  const URL_REGEX = /https?:\/\/[^\s<>"]+/g
+
+  function linkify(text: string): string {
+    // HTMLエスケープしてからURLをリンクに置換（XSS対策）
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+    return escaped.replace(URL_REGEX, (url) =>
+      `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-theme-accent underline break-all hover:opacity-80">${url}</a>`
+    )
+  }
+
+  const linkedContent = $derived(linkify(event.content))
 </script>
 
 <article class="flex gap-3 px-4 py-3 border-b border-theme hover:bg-theme-hover transition-colors">
@@ -38,7 +54,7 @@
       <span class="font-bold text-sm text-theme truncate">{displayName}</span>
       <span class="text-theme-muted text-sm flex-shrink-0">· {timeStr}</span>
     </div>
-    <p class="text-theme text-sm leading-relaxed whitespace-pre-wrap break-words">{event.content}</p>
+    <p class="text-theme text-sm leading-relaxed whitespace-pre-wrap break-words">{@html linkedContent}</p>
     <div class="mt-1">
       {#if isEarthquake}
         <span class="text-orange-500 text-xs font-bold">⚠ 地震速報</span>
