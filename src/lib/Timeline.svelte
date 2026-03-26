@@ -31,16 +31,17 @@
         onclick={onToggleEarthquake}
         role="switch"
         aria-checked={showEarthquake}
-        class="flex items-center gap-1.5 text-xs transition-opacity"
+        class="flex items-center gap-1 whitespace-nowrap transition-opacity"
+        style="font-size: 10px;"
         class:opacity-40={!showEarthquake}
         title={showEarthquake ? '地震速報を非表示' : '地震速報を表示'}
       >
-        <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 text-orange-500" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <svg viewBox="0 0 24 24" class="w-3 h-3 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <polyline points="2,12 5,12 7,5 9,19 11,8 13,16 15,12 22,12"/>
         </svg>
         <span class="text-theme-muted">地震速報</span>
-        <span class="relative inline-flex w-8 h-4 rounded-full transition-colors flex-shrink-0 {showEarthquake ? 'bg-orange-500' : 'bg-gray-400'}">
-          <span class="absolute top-0.5 w-3 h-3 rounded-full bg-white transition-transform {showEarthquake ? 'left-[18px]' : 'left-0.5'}"></span>
+        <span class="relative inline-flex w-7 h-3.5 rounded-full transition-colors flex-shrink-0 {showEarthquake ? 'bg-orange-500' : 'bg-gray-400'}">
+          <span class="absolute top-0.5 w-2.5 h-2.5 rounded-full bg-white transition-transform {showEarthquake ? 'left-[14px]' : 'left-0.5'}"></span>
         </span>
       </button>
       <NostrPromo />
