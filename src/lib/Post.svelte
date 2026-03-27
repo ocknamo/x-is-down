@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Event } from 'nostr-tools'
   import { nip19 } from 'nostr-tools'
+  import LinkifyIt from 'linkify-it'
   import { shortNpub, HASHTAG, type UserProfile } from './nostr'
   import EggAvatar from './EggAvatar.svelte'
 
@@ -22,18 +23,29 @@
     minute: '2-digit',
   }))
 
-  const URL_REGEX = /https?:\/\/[^\s<>"]+/g
+  const linkifyIt = new LinkifyIt()
 
-  function linkify(text: string): string {
-    // HTMLエスケープしてからURLをリンクに置換（XSS対策）
-    const escaped = text
+  function escapeHtml(text: string): string {
+    return text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
-    return escaped.replace(URL_REGEX, (url) =>
-      `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-theme-accent underline break-all hover:opacity-80">${url}</a>`
-    )
+  }
+
+  function linkify(text: string): string {
+    const matches = linkifyIt.match(text)
+    if (!matches) return escapeHtml(text)
+
+    let result = ''
+    let lastIndex = 0
+    for (const match of matches) {
+      result += escapeHtml(text.slice(lastIndex, match.index))
+      result += `<a href="${escapeHtml(match.url)}" target="_blank" rel="noopener noreferrer" class="text-theme-accent underline break-all hover:opacity-80">${escapeHtml(match.text)}</a>`
+      lastIndex = match.lastIndex
+    }
+    result += escapeHtml(text.slice(lastIndex))
+    return result
   }
 
   const linkedContent = $derived(linkify(event.content))
