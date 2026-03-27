@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte'
   import type { Event } from 'nostr-tools'
-  import { subscribeToTag, fetchRecentPosts, fetchUserProfiles, type UserProfile } from './lib/nostr'
+  import { subscribeToTag, fetchRecentPosts, fetchUserProfiles, subscribeToEarthquakeAccounts, EARTHQUAKE_PUBKEYS, type UserProfile } from './lib/nostr'
   import { addUniqueEvent } from './lib/utils'
   import PostForm from './lib/PostForm.svelte'
   import Timeline from './lib/Timeline.svelte'
@@ -12,6 +12,19 @@
   let loading = $state(true)
   let profiles = $state<Map<string, UserProfile>>(new Map())
   const fetchedPubkeys = new Set<string>()
+
+  const earthquakePostIds = new Set<string>()
+  const EQ_TOGGLE_KEY = 'x-is-down:showEarthquake'
+  let showEarthquake = $state(localStorage.getItem(EQ_TOGGLE_KEY) !== 'false')
+  function toggleEarthquake() {
+    showEarthquake = !showEarthquake
+    localStorage.setItem(EQ_TOGGLE_KEY, String(showEarthquake))
+  }
+  const visiblePosts = $derived(
+    showEarthquake
+      ? posts
+      : posts.filter((p) => !earthquakePostIds.has(p.id))
+  )
 
   onMount(() => {
     initTheme()
@@ -26,6 +39,11 @@
     if (result.size > 0) {
       profiles = new Map([...profiles, ...result])
     }
+  }
+
+  function handleEarthquakeEvent(event: Event) {
+    earthquakePostIds.add(event.id)
+    handleEvent(event)
   }
 
   function handleEvent(event: Event) {
@@ -57,8 +75,18 @@
     }, 60_000)
   })
 
+  const { unsubscribe: unsubscribeEq } = subscribeToEarthquakeAccounts(
+    handleEarthquakeEvent,
+    () => {
+      loadProfiles(EARTHQUAKE_PUBKEYS).catch((e: unknown) =>
+        console.error('[profiles] earthquake fetchUserProfiles failed:', e),
+      )
+    },
+  )
+
   onDestroy(() => {
     unsubscribe()
+    unsubscribeEq()
     clearInterval(refreshInterval)
   })
 </script>
@@ -119,7 +147,7 @@
     <PostForm onPosted={handleEvent} />
 
     <!-- Timeline -->
-    <Timeline {posts} {loading} {profiles} />
+    <Timeline posts={visiblePosts} {loading} {profiles} {earthquakePostIds} {showEarthquake} onToggleEarthquake={toggleEarthquake} />
   </main>
 
   <footer class="max-w-xl mx-auto px-4 py-4 flex justify-center border-t border-theme-subtle mt-2">

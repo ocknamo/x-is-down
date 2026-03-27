@@ -10,20 +10,42 @@
     posts: Event[]
     loading: boolean
     profiles: Map<string, UserProfile>
+    earthquakePostIds: Set<string>
+    showEarthquake: boolean
+    onToggleEarthquake: () => void
   }
 
-  const { posts, loading, profiles }: Props = $props()
+  const { posts, loading, profiles, earthquakePostIds, showEarthquake, onToggleEarthquake }: Props = $props()
 
   const t = $derived(getTranslations(theme()))
 </script>
 
 <section>
-  <div class="px-4 py-3 border-b border-theme flex items-end justify-between">
-    <div>
-      <h2 class="font-bold text-theme">{t.timelineTitle}</h2>
-      <p class="text-theme-muted text-sm">{t.timelineSubtitle}</p>
+  <div class="px-4 py-3 border-b border-theme" style="display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 8px;">
+    <h2 class="font-bold text-theme" style="grid-column: 1; grid-row: 1;">{t.timelineTitle}</h2>
+    <div style="grid-column: 2; grid-row: 1; display: flex; align-items: flex-start; justify-content: flex-end;">
+      <button
+        onclick={onToggleEarthquake}
+        role="switch"
+        aria-checked={showEarthquake}
+        class="transition-opacity"
+        style="display: inline-flex; flex-direction: row; align-items: center; gap: 4px; font-size: 10px; white-space: nowrap;"
+        class:opacity-50={!showEarthquake}
+        title={showEarthquake ? '地震速報を非表示' : '地震速報を表示'}
+      >
+        <svg viewBox="0 0 24 24" style="width: 12px; height: 12px; flex-shrink: 0;" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="text-orange-500">
+          <polyline points="2,12 5,12 7,5 9,19 11,8 13,16 15,12 22,12"/>
+        </svg>
+        <span class="text-theme-muted">地震速報</span>
+        <span style:background={showEarthquake ? '#f97316' : '#6b7280'} style:border={showEarthquake ? '1px solid #ea580c' : '1px solid #4b5563'} style="position: relative; display: inline-flex; width: 26px; height: 14px; border-radius: 9999px; flex-shrink: 0; transition: background 0.15s, border-color 0.15s;">
+          <span style:left={showEarthquake ? '13px' : '2px'} style="position: absolute; top: 1px; width: 10px; height: 10px; border-radius: 9999px; background: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.4); transition: left 0.15s;"></span>
+        </span>
+      </button>
     </div>
-    <NostrPromo />
+    <p class="text-theme-muted text-sm" style="grid-column: 1; grid-row: 2;">{t.timelineSubtitle}</p>
+    <div style="grid-column: 2; grid-row: 2; display: flex; align-items: flex-end; justify-content: flex-end;">
+      <NostrPromo />
+    </div>
   </div>
 
   {#if loading}
@@ -37,7 +59,7 @@
     </div>
   {:else}
     {#each posts as event (event.id)}
-      <Post {event} profile={profiles.get(event.pubkey)} />
+      <Post {event} profile={profiles.get(event.pubkey)} isEarthquake={earthquakePostIds.has(event.id)} />
     {/each}
   {/if}
 </section>
