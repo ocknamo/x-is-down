@@ -26,11 +26,9 @@
   const linkifyIt = new LinkifyIt()
 
   function escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
+    const div = document.createElement('div')
+    div.textContent = text
+    return div.innerHTML
   }
 
   function linkify(text: string): string {
