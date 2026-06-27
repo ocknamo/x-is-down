@@ -1,3 +1,4 @@
+import { NosskeyIframeClient, NosskeyIframeError } from 'nosskey-iframe'
 import {
   SimplePool,
   finalizeEvent,
@@ -79,27 +80,143 @@ export async function getNip07PublicKey(): Promise<string> {
   return window.nostr.getPublicKey()
 }
 
-export async function publishPost(content: string, nip07Pubkey?: string): Promise<Event> {
+// --- nosskey.app (iframe signing provider) -----------------------------------
+
+const NOSSKEY_IFRAME_URL = 'https://nosskey.app/#/iframe'
+
+export type NosskeyTheme = 'neutral-dark' | 'neutral-light'
+
+/** Map the parent app theme to a matching nosskey iframe theme. */
+export function nosskeyThemeFor(appTheme: 'x' | 'twitter'): NosskeyTheme {
+  // 'x' is the dark theme, 'twitter' is the light theme.
+  return appTheme === 'twitter' ? 'neutral-light' : 'neutral-dark'
+}
+
+interface NosskeySession {
+  client: NosskeyIframeClient
+  cleanup: () => void
+}
+
+let nosskeySession: NosskeySession | null = null
+
+export function isNosskeyLoggedIn(): boolean {
+  return nosskeySession !== null
+}
+
+/**
+ * Style the iframe as a centered modal and add a dimmed backdrop. The SDK only
+ * toggles `iframe.style.display` between `none`/`block` when a consent dialog is
+ * needed, so we observe that and sync the backdrop visibility.
+ */
+function mountNosskeyModal(client: NosskeyIframeClient): () => void {
+  const iframe = client.iframe
+  Object.assign(iframe.style, {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 'min(420px, 92vw)',
+    height: 'min(640px, 90vh)',
+    border: 'none',
+    borderRadius: '16px',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.45)',
+    zIndex: '10000',
+  })
+
+  const backdrop = document.createElement('div')
+  Object.assign(backdrop.style, {
+    position: 'fixed',
+    inset: '0',
+    background: 'rgba(0, 0, 0, 0.6)',
+    zIndex: '9999',
+    display: 'none',
+  })
+  document.body.appendChild(backdrop)
+
+  const sync = () => {
+    backdrop.style.display = iframe.style.display === 'none' ? 'none' : 'block'
+  }
+  const observer = new MutationObserver(sync)
+  observer.observe(iframe, { attributes: true, attributeFilter: ['style'] })
+  sync()
+
+  return () => {
+    observer.disconnect()
+    backdrop.remove()
+  }
+}
+
+/**
+ * Create the nosskey iframe client and resolve the user's public key. Throws
+ * `NosskeyIframeError` with code `NO_KEY` when no passkey has been set up yet
+ * (the user must visit nosskey.app first).
+ */
+export async function loginWithNosskey(theme: NosskeyTheme): Promise<string> {
+  logoutNosskey()
+
+  const lang: 'ja' | 'en' =
+    typeof navigator !== 'undefined' && navigator.language.startsWith('ja')
+      ? 'ja'
+      : 'en'
+
+  const client = new NosskeyIframeClient({
+    iframeUrl: NOSSKEY_IFRAME_URL,
+    theme,
+    lang,
+  })
+  const cleanup = mountNosskeyModal(client)
+
+  try {
+    await client.ready()
+    const pubkey = await client.getPublicKey()
+    nosskeySession = { client, cleanup }
+    return pubkey
+  } catch (e) {
+    cleanup()
+    client.destroy()
+    throw e
+  }
+}
+
+export function logoutNosskey(): void {
+  if (!nosskeySession) return
+  nosskeySession.cleanup()
+  nosskeySession.client.destroy()
+  nosskeySession = null
+}
+
+export function isNosskeyNoKeyError(e: unknown): boolean {
+  return e instanceof NosskeyIframeError && e.code === 'NO_KEY'
+}
+
+// --- publishing --------------------------------------------------------------
+
+export type LoginMethod = 'nip07' | 'nosskey'
+
+export interface PostAuth {
+  method: LoginMethod
+  pubkey: string
+}
+
+export async function publishPost(content: string, auth?: PostAuth): Promise<Event> {
+  const unsigned = {
+    kind: 1,
+    created_at: Math.floor(Date.now() / 1000),
+    tags: [['t', HASHTAG]],
+    content,
+  }
+
   let event: Event
 
-  if (nip07Pubkey && window.nostr) {
-    event = await window.nostr.signEvent({
-      kind: 1,
-      created_at: Math.floor(Date.now() / 1000),
-      tags: [['t', HASHTAG]],
-      content,
-      pubkey: nip07Pubkey,
-    })
+  if (auth?.method === 'nip07' && window.nostr) {
+    event = await window.nostr.signEvent({ ...unsigned, pubkey: auth.pubkey })
+  } else if (auth?.method === 'nosskey' && nosskeySession) {
+    event = (await nosskeySession.client.signEvent({
+      ...unsigned,
+      pubkey: auth.pubkey,
+    })) as Event
   } else {
-    event = finalizeEvent(
-      {
-        kind: 1,
-        created_at: Math.floor(Date.now() / 1000),
-        tags: [['t', HASHTAG]],
-        content,
-      },
-      secretKey,
-    )
+    event = finalizeEvent(unsigned, secretKey)
   }
 
   console.log('[publishPost] finalized event:', JSON.stringify(event, null, 2))

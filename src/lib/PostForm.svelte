@@ -2,8 +2,21 @@
   import { onMount } from 'svelte'
   import { nip19 } from 'nostr-tools'
   import type { Event } from 'nostr-tools'
-  import { publishPost, npub, publicKey, shortNpub, isNip07Available, getNip07PublicKey } from './nostr'
+  import {
+    publishPost,
+    npub,
+    publicKey,
+    shortNpub,
+    isNip07Available,
+    getNip07PublicKey,
+    loginWithNosskey,
+    logoutNosskey,
+    nosskeyThemeFor,
+    isNosskeyNoKeyError,
+    type LoginMethod,
+  } from './nostr'
   import EggAvatar from './EggAvatar.svelte'
+  import LoginDialog from './LoginDialog.svelte'
   import { getTranslations } from './i18n'
   import { theme } from './theme.svelte'
 
@@ -19,11 +32,17 @@
   let isPosting = $state(false)
   let error = $state('')
   let nip07Available = $state(false)
-  let nip07Pubkey = $state<string | null>(null)
+  let loginMethod = $state<LoginMethod | null>(null)
+  let loginPubkey = $state<string | null>(null)
+  let loggingIn = $state(false)
+  let loginDialog = $state<{ close: () => void }>()
 
-  const activePubkey = $derived(nip07Pubkey ?? publicKey)
-  const activeNpub = $derived(nip07Pubkey ? nip19.npubEncode(nip07Pubkey) : npub)
+  const activePubkey = $derived(loginPubkey ?? publicKey)
+  const activeNpub = $derived(loginPubkey ? nip19.npubEncode(loginPubkey) : npub)
   const displayName = $derived(shortNpub(activeNpub))
+  const loggedInLabel = $derived(
+    loginMethod === 'nosskey' ? t.loggedInWithNosskey : t.loggedInWithNip07,
+  )
 
   onMount(() => {
     setTimeout(() => {
@@ -37,16 +56,40 @@
     }, 1000)
   })
 
-  async function loginWithNip07() {
+  async function selectNip07() {
+    error = ''
+    loggingIn = true
     try {
-      nip07Pubkey = await getNip07PublicKey()
+      loginPubkey = await getNip07PublicKey()
+      loginMethod = 'nip07'
+      loginDialog?.close()
     } catch (e) {
       console.error('[NIP-07] login failed:', e)
+    } finally {
+      loggingIn = false
+    }
+  }
+
+  async function selectNosskey() {
+    error = ''
+    loggingIn = true
+    try {
+      loginPubkey = await loginWithNosskey(nosskeyThemeFor(theme()))
+      loginMethod = 'nosskey'
+      loginDialog?.close()
+    } catch (e) {
+      console.error('[nosskey] login failed:', e)
+      error = isNosskeyNoKeyError(e) ? t.nosskeyNoKey : t.nosskeyLoginError
+      loginDialog?.close()
+    } finally {
+      loggingIn = false
     }
   }
 
   function logout() {
-    nip07Pubkey = null
+    if (loginMethod === 'nosskey') logoutNosskey()
+    loginMethod = null
+    loginPubkey = null
   }
 
   async function handleSubmit() {
@@ -54,7 +97,11 @@
     isPosting = true
     error = ''
     try {
-      const event = await publishPost(postText, nip07Pubkey ?? undefined)
+      const auth =
+        loginMethod && loginPubkey
+          ? { method: loginMethod, pubkey: loginPubkey }
+          : undefined
+      const event = await publishPost(postText, auth)
       onPosted(event)
       postText = t.defaultPostText
     } catch (e) {
@@ -67,18 +114,19 @@
 </script>
 
 <div class="px-4 py-3 border-b border-theme">
-  {#if nip07Available && !nip07Pubkey}
+  {#if !loginMethod}
     <div class="mb-3 flex justify-end">
-      <button
-        onclick={loginWithNip07}
-        class="text-xs text-theme-accent border border-theme-accent px-3 py-1 rounded-full transition-colors hover:opacity-80"
-      >
-        {t.loginWithNostr}
-      </button>
+      <LoginDialog
+        bind:this={loginDialog}
+        {nip07Available}
+        busy={loggingIn}
+        onSelectNip07={selectNip07}
+        onSelectNosskey={selectNosskey}
+      />
     </div>
-  {:else if nip07Pubkey}
+  {:else}
     <div class="mb-3 flex justify-end items-center gap-2">
-      <span class="text-xs text-theme-muted">{t.loggedInWithNip07}</span>
+      <span class="text-xs text-theme-muted">{loggedInLabel}</span>
       <button
         onclick={logout}
         class="text-xs text-theme-muted hover:opacity-70 transition-opacity"
