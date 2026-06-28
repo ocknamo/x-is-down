@@ -24,6 +24,7 @@ src/
   main.ts             # エントリポイント
   lib/
     EggAvatar.svelte  # 卵アバターコンポーネント
+    LoginDialog.svelte # ログイン方法選択ダイアログ（NIP-07 / nosskey）
     NostrPromo.svelte # Nostr誘導コンポーネント
     Post.svelte       # 投稿表示コンポーネント
     PostForm.svelte   # 投稿フォームコンポーネント
