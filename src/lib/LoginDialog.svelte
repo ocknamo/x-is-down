@@ -63,21 +63,19 @@
   </div>
 
   <div class="flex flex-col gap-3">
-    {#if nip07Available}
-      <button
-        onclick={selectNip07}
-        disabled={busy}
-        class="text-left rounded-lg border border-theme-dialog px-4 py-3 transition-colors hover:bg-theme-hover disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <div class="font-bold text-sm text-theme">{t.loginWithNip07}</div>
-        <div class="text-xs text-theme-muted mt-0.5">{t.loginWithNip07Desc}</div>
-      </button>
-    {/if}
+    <button
+      onclick={selectNip07}
+      disabled={busy || !nip07Available}
+      class="text-left rounded-lg border border-theme-dialog px-4 py-3 transition-colors hover:bg-theme-hover disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+    >
+      <div class="font-bold text-sm text-theme">{t.loginWithNip07}</div>
+      <div class="text-xs text-theme-muted mt-0.5">{t.loginWithNip07Desc}</div>
+    </button>
 
     <button
       onclick={selectNosskey}
       disabled={busy}
-      class="text-left rounded-lg border border-theme-dialog px-4 py-3 transition-colors hover:bg-theme-hover disabled:opacity-50 disabled:cursor-not-allowed"
+      class="text-left rounded-lg border border-theme-dialog px-4 py-3 transition-colors hover:bg-theme-hover disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
     >
       <div class="font-bold text-sm text-theme">{t.loginWithNosskey}</div>
       <div class="text-xs text-theme-muted mt-0.5">{t.loginWithNosskeyDesc}</div>
