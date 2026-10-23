@@ -41,8 +41,7 @@ const svg = `
         font-family="'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif"
         font-size="110"
         font-weight="900"
-        fill="#FFFFFF"
-        dominant-baseline="middle">X落ちてる？</text>
+        fill="#FFFFFF">X落ちてる？</text>
 
   <!-- Red alert badge -->
   <rect x="430" y="340" width="220" height="52" rx="26" fill="#DC2626"/>
